@@ -2,6 +2,8 @@ import tkinter
 import customtkinter 
 import datetime
 import random
+from email.message import EmailMessage
+import smtplib
 from datetime import datetime
 from datetime import timedelta
 from customtkinter import *
@@ -23,19 +25,21 @@ jueves = pestaña.add("Jueves")
 viernes = pestaña.add("Viernes")
 sabado = pestaña.add("Sabado")
 domingo = pestaña.add("Domingo")
-#Entradas
+#Entradas y label
 cantidad = customtkinter.CTkEntry(master=ventana)
-cantidad.pack(padx=10,side = LEFT)
-cantidad_actividades = cantidad.get()
-#Label
+cantidad.pack(pady=10,side = TOP)
 texto_cantidad = customtkinter.CTkLabel(master=ventana, text="Ingresa la cantidad de actividades",font=("NORMAL",16))
-texto_cantidad.pack(side =LEFT)
-
+texto_cantidad.pack(side =TOP)
+gmail_entrante = customtkinter.CTkEntry(master=ventana)
+gmail_entrante.pack(pady= 10, side = TOP)
+gmail_texto = customtkinter.CTkLabel(master = ventana, text="Ingresa los gmail, usando de por medio el boton añadir ",font=("NORMAL",16))
+gmail_texto.pack(side=TOP)
 #Clase dia (funcion especial: trabajo de objetos y orden de actividades)
 class dias:
 
-    def __init__(self):
-        " "
+    def __init__(self, dia_nombre):
+        self.nombre = dia_nombre
+        # self.lista_mails = []
     def listaAlumnos(self):
         self.lista_dias = [Lunes,Martes,Miercoles,Jueves,Viernes,Sabado,Domingo]
         # return lista_dias
@@ -66,13 +70,16 @@ class dias:
         lista = [self.entry1.get(), self.entry2.get(), self.entry3.get(), self.entry4.get(), self.entry5.get(), self.entry6.get(), self.entry7.get()]
         return (lista)
 #Lo que permite dar un dato aleatorio en tanto a las horas, y a las actividades diarias
-    def randomact(self, lista):
-        for act in lista:
-            if act == "":
-                lista.remove(act)
-        resultado = random.sample(lista, k = int(texto_cantidad))
-        print(resultado)
-        return resultado
+    def randomact(self, lista, cantidad):
+        try:
+            for act in lista:
+                if act == "":
+                    lista.remove(act)
+            resultado = random.sample(lista, k = int(cantidad))
+            print(resultado)
+            # instancia.enviar_correos(resultado) 
+        except ValueError:
+            print("No se puede colocar letras o palabras en la cantidad, o un mayor numero que las actividades correspondientes")
 #Saber cual dia de la semana es
     def diaActual(self):
         listadias = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"]
@@ -87,23 +94,37 @@ class dias:
             if dia_semana == nombre:
                 return dia_semana
 #Mandar gmail
-    def Gmail():
-        "hola"
+    # def texto_gmail(self):
+    #     gmail_destinatario = gmail_entrante.get()
+    #     self.lista_mails.append(gmail_destinatario)
+    # def enviar_correos(self,actividades):
+    #     remitente = "ittaproyectooli@gmail.com"
+    #     email = EmailMessage()
+    #     email["From"] = remitente
+    #     email["Subject"] = "Actividades"
+    #     email.set_content(actividades)
+    #     for destinatario in self.lista_mails:
+    #         email["To"] = destinatario
+    #         smtp = smtplib.SMTP_SSL("smtp.gmail.com")
+    #         smtp.login(remitente, "jksw zhhb lmvh qppn")
+    #         smtp.sendmail(remitente, destinatario, email.as_string())
+    #         smtp.quit()
 #Guardar texto
     def guardar_texto(self,diaActual):
         for dia in self.lista_dias:
             dia.conseguir_texto()
-            if dia == diaActual:
-                dia.randomact(dia.conseguir_texto())
+            if dia.nombre == diaActual:
+                cantidad_acts = cantidad.get()
+                dia.randomact(dia.conseguir_texto(), cantidad_acts)
 #Objetos (Dias) / Crear una lista de los dias
-Lunes = dias()
-Martes = dias()
-Miercoles = dias()
-Jueves = dias()
-Viernes = dias()
-Sabado = dias()
-Domingo = dias() 
-instancia = dias()
+Lunes = dias("Lunes")
+Martes = dias("Martes")
+Miercoles = dias("Miercoles")
+Jueves = dias("Jueves")
+Viernes = dias("Viernes")
+Sabado = dias("Sabado")
+Domingo = dias("Domingo") 
+instancia = dias("instancia")
 #Crear las ventanas
 Lunes.armar(lunes)
 Martes.armar(martes)
@@ -116,11 +137,26 @@ Domingo.armar(domingo)
 instancia.listaAlumnos()
 Diaactual = instancia.diaActual()
 dia_act = instancia.BuscarPorNombre(Diaactual)
-# while Diaactual != Diaactual:
-#     Diaactual = instancia.diaActual
+# while Diaactual != instancia.diaActual:
+#      Diaactual = instancia.diaActual
 #Botones
 boton_guardar = customtkinter.CTkButton(master=ventana, command = lambda: instancia.guardar_texto(Diaactual), width= 20, height=20, text="Guardar")
-boton_guardar.pack(side=TOP)
-# boton_guardar = customtkinter.CTkButton(master=ventana, command = lambda: instancia.print_dia, width= 20, height=20, text="Print")
-# boton_guardar.pack(side=TOP)
+boton_guardar.pack(side=RIGHT,padx=20)
+# boton_añadir = customtkinter.CTkButton(master=ventana,command= lambda: instancia.texto_gmail,width= 20, height=20, text="Añadir")
+# boton_añadir.pack(side=RIGHT,padx=1)
 ventana.mainloop()
+
+# if activador == True:     
+#     remitente = "ittaproyectooli@gmail.com"
+#     email = EmailMessage()    
+#     listagmails = instancia.texto_gmail()
+#     Mensaje = instancia.preparacion()
+#     for gmail in listagmails:
+#         email["From"] = remitente
+#         email["To"] = gmail
+#         email["Subject"] = "Actividades"
+#         email.setcontent(Mensaje)
+#         smtp = smtplib.SMTP_SSL("smtp.gmail.com")
+#         smtp.login(remitente,"jksw zhhb lmvh qppn")
+#         smtp.sendmail(remitente,gmail, email.as_string())
+#         smtp.quit()
